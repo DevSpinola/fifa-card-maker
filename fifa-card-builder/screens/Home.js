@@ -1,12 +1,37 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
+
+// Imagens das cartas para a animação da logo
+const cardImages = [
+  require('../assets/gold.png'),
+  require('../assets/silver.png'),
+  require('../assets/bronze.png')
+];
 
 export default function Home({ navigation }) {
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  // Efeito para trocar a imagem da carta a cada 1.5 segundos
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentImageIndex((prevIndex) => (prevIndex + 1) % cardImages.length);
+    }, 1500);
+
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <View style={styles.container}>
+      {/* Exibe a imagem atual do carrossel */}
+      <Image 
+        source={cardImages[currentImageIndex]} 
+        style={styles.logo} 
+        resizeMode="contain"
+      />
       <Text style={styles.title}>FIFA Card Builder</Text>
       
       <View style={styles.buttonContainer}>
+        {/* Botão para navegar para a tela de consulta */}
         <TouchableOpacity 
           style={styles.button} 
           onPress={() => navigation.navigate('ConsultCards')}
@@ -14,6 +39,7 @@ export default function Home({ navigation }) {
           <Text style={styles.buttonText}>Consultar Cartas</Text>
         </TouchableOpacity>
 
+        {/* Botão para navegar para a tela de criação */}
         <TouchableOpacity 
           style={styles.button} 
           onPress={() => navigation.navigate('CreateCard')}
@@ -32,6 +58,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     padding: 20,
+  },
+  logo: {
+    width: 150,
+    height: 200,
+    marginBottom: 20,
   },
   title: {
     fontSize: 32,
