@@ -3,7 +3,8 @@ import { View, Text, Image, ImageBackground, StyleSheet, Dimensions, Platform } 
 
 const { width } = Dimensions.get('window');
 const CARD_WIDTH = width * 0.85;
-const CARD_ASPECT_RATIO = 1.45; 
+// Ajuste leve no aspect ratio para ficar mais próximo do real
+const CARD_ASPECT_RATIO = 1.48; 
 const CARD_HEIGHT = CARD_WIDTH * CARD_ASPECT_RATIO;
 
 const CARD_TEMPLATES = {
@@ -32,18 +33,14 @@ export default function FifaCardPro({ card }) {
     return def ? def.label.substring(0, 3).toUpperCase() : key.substring(0, 3).toUpperCase();
   };
 
-  // Definição manual das colunas para ficar IGUAL ao FIFA
-  // Coluna 1: Ritmo, Chute, Passe
   const col1Keys = ['pac', 'sho', 'pas']; 
-  // Coluna 2: Drible, Defesa, Físico
   const col2Keys = ['dri', 'def', 'phy'];
 
-  // Fallback caso as chaves não sejam padrão FIFA
   const allKeys = Object.keys(attributes || {});
   const leftColumn = col1Keys.every(k => allKeys.includes(k)) ? col1Keys : allKeys.slice(0, 3);
   const rightColumn = col2Keys.every(k => allKeys.includes(k)) ? col2Keys : allKeys.slice(3, 6);
 
-  const textColor = '#3e3222'; // Cor padrão FIFA (Marrom escuro)
+  const textColor = '#3e3222'; 
 
   return (
     <View style={styles.container}>
@@ -61,16 +58,13 @@ export default function FifaCardPro({ card }) {
         {/* CAMADA 3: INFORMAÇÕES */}
         <View style={styles.overlayContainer}>
           
-          {/* LADO ESQUERDO: Rating, Posição, Nação, Clube */}
+          {/* LADO ESQUERDO: Rating, Posição, Nação/Clube */}
           <View style={styles.infoLeftColumn}>
             <Text style={[styles.ratingText, { color: textColor }]}>{overall}</Text>
             <Text style={[styles.positionText, { color: textColor }]}>{position?.toUpperCase()}</Text>
             
-            {/* Linha decorativa abaixo da posição */}
             <View style={[styles.dividerLine, { backgroundColor: textColor }]} />
             
-            {/* Ícones empilhados (Nação em cima, Clube embaixo) se houvesse bandeira */}
-            {/* Simulando apenas o clube por enquanto */}
             {sport?.icon && (
                <View style={styles.iconWrapper}>
                  <Image source={{ uri: sport.icon }} style={styles.clubIcon} resizeMode="contain" />
@@ -83,14 +77,13 @@ export default function FifaCardPro({ card }) {
             <Text style={[styles.playerName, { color: textColor }]} numberOfLines={1} adjustsFontSizeToFit>
               {player.name.toUpperCase()}
             </Text>
-            {/* Linha decorativa abaixo do nome */}
             <View style={[styles.nameDivider, { backgroundColor: textColor }]} />
           </View>
 
           {/* GRID DE ATRIBUTOS */}
           <View style={styles.attributesContainer}>
-             {/* Coluna Esquerda */}
-             <View style={styles.attrColumn}>
+             {/* Coluna Esquerda (Alinhada à direita, perto da linha) */}
+             <View style={[styles.attrColumn, { alignItems: 'flex-end', paddingRight: 8 }]}>
                 {leftColumn.map(key => (
                   <View key={key} style={styles.attrItem}>
                     <Text style={[styles.attrValue, { color: textColor }]}>{attributes[key]}</Text>
@@ -102,8 +95,8 @@ export default function FifaCardPro({ card }) {
              {/* Divisor Vertical Central */}
              <View style={[styles.verticalSeparator, { backgroundColor: textColor }]} />
 
-             {/* Coluna Direita */}
-             <View style={styles.attrColumn}>
+             {/* Coluna Direita (Alinhada à esquerda, perto da linha) */}
+             <View style={[styles.attrColumn, { alignItems: 'flex-start', paddingLeft: 8 }]}>
                 {rightColumn.map(key => (
                   <View key={key} style={styles.attrItem}>
                     <Text style={[styles.attrValue, { color: textColor }]}>{attributes[key]}</Text>
@@ -125,6 +118,7 @@ const styles = StyleSheet.create({
     height: CARD_HEIGHT,
     alignSelf: 'center',
     marginVertical: 20,
+    // Sombras
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 10 },
     shadowOpacity: 0.4,
@@ -135,15 +129,13 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
   },
-  // A foto deve ficar um pouco "abaixo" das infos laterais, mas visível
   playerImageContainer: {
     position: 'absolute',
-    top: '15%', 
-    right: '8%', // Empurra a foto para a direita, liberando espaço para o Rating na esquerda
-    width: '55%', 
+    top: '16%', // Ajuste fino para a foto
+    right: '8%', 
+    width: '50%', 
     height: '40%', 
     zIndex: 1, 
-    overflow: 'hidden'
   },
   playerImage: {
     width: '100%',
@@ -153,37 +145,37 @@ const styles = StyleSheet.create({
     flex: 1,
     zIndex: 2,
   },
-  // Coluna da esquerda (onde fica 99, ATA, Bandeira)
+  // --- LADO ESQUERDO (Rating/Pos) ---
   infoLeftColumn: {
     position: 'absolute',
-    top: '20%', 
-    left: '8%', // Margem da esquerda
+    top: '22%', // Desci de 20% para 22% para não ficar colado no topo
+    left: '10%', 
     alignItems: 'center',
-    width: '22%',
+    width: '20%',
   },
   ratingText: {
-    // Tenta usar fonte condensada nativa
     fontFamily: Platform.OS === 'ios' ? 'AvenirNext-CondensedBold' : 'sans-serif-condensed',
-    fontSize: 42, // Rating bem grande
+    fontSize: 38, // Levemente menor para não estourar
     fontWeight: 'bold', 
     includeFontPadding: false,
-    lineHeight: 42,
+    lineHeight: 38,
   },
   positionText: {
     fontFamily: Platform.OS === 'ios' ? 'AvenirNext-Condensed' : 'sans-serif-condensed',
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: '600',
+    marginTop: -2, // Aproxima a posição do rating
     marginBottom: 4,
   },
   dividerLine: {
-    width: '100%',
+    width: '80%', // Menor que 100% para ficar estético
     height: 1,
-    opacity: 0.4,
-    marginBottom: 8,
+    opacity: 0.5,
+    marginBottom: 6,
   },
   iconWrapper: {
-    width: 32,
-    height: 32,
+    width: 28,
+    height: 28,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -192,59 +184,62 @@ const styles = StyleSheet.create({
     height: '100%',
     opacity: 0.9,
   },
+  // --- NOME ---
   nameContainer: {
     position: 'absolute',
-    top: '64%', // Ponto onde começa a área de texto
+    top: '63%', // Posição ideal do nome
     width: '100%',
     alignItems: 'center',
-    paddingHorizontal: 25,
+    paddingHorizontal: 20,
   },
   playerName: {
     fontFamily: Platform.OS === 'ios' ? 'AvenirNext-CondensedBold' : 'sans-serif-condensed',
-    fontSize: 26,
+    fontSize: 24,
     fontWeight: 'bold',
     letterSpacing: 0.5,
+    textAlign: 'center',
     textTransform: 'uppercase',
-    marginBottom: 2,
   },
   nameDivider: {
-    width: '80%',
+    width: '85%',
     height: 1,
-    opacity: 0.2,
+    opacity: 0.3,
     marginTop: 4,
   },
+  // --- ATRIBUTOS ---
   attributesContainer: {
     position: 'absolute',
-    bottom: '13%', // Ajuste para não colar no fundo
+    bottom: '14%', // Subi um pouco o bloco todo
     width: '100%',
+    paddingHorizontal: 30, // Margem lateral para centralizar o bloco visualmente
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
   },
   attrColumn: {
-    width: '35%', // Largura das colunas de stats
-    paddingLeft: 15, // Recuo interno para alinhar texto
+    flex: 1, // Divide o espaço igualmente
+    // O alinhamento é controlado inline no JSX (flex-end vs flex-start)
   },
   attrItem: {
     flexDirection: 'row',
-    alignItems: 'center', // Centraliza verticalmente
-    marginBottom: 2,
+    alignItems: 'center',
+    marginBottom: 1, // Espaçamento vertical entre linhas
   },
   attrValue: {
     fontFamily: Platform.OS === 'ios' ? 'AvenirNext-CondensedBold' : 'sans-serif-condensed',
     fontWeight: 'bold',
-    fontSize: 19,
-    marginRight: 6, // Espaço entre número e label
+    fontSize: 18,
+    marginHorizontal: 4, // Espaço entre numero e texto
   },
   attrLabel: {
     fontFamily: Platform.OS === 'ios' ? 'AvenirNext-Condensed' : 'sans-serif-condensed',
-    fontWeight: '500',
+    fontWeight: '400',
     fontSize: 16,
   },
   verticalSeparator: {
     width: 1,
-    height: '85%', // Altura da linha divisória dos stats
-    opacity: 0.2,
-    marginHorizontal: 0,
+    height: '90%', 
+    opacity: 0.3,
+    marginHorizontal: 5, // Espaço da linha para as colunas
   }
 });
