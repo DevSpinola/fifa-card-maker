@@ -2,7 +2,7 @@ const PlayerModel = require('../model/PlayerModel');
 const SportModel = require('../model/SportModel');
 const mongoose = require('mongoose');
 
-async function PlayerSportValidation(req, res, next) {
+async function CardValidation(req, res, next) {
   const { player, sport, attributes } = req.body;
 
   if (!player) return res.status(400).json({ error: 'player is required' });
@@ -47,4 +47,4 @@ async function PlayerSportValidation(req, res, next) {
   return next();
 }
 
-module.exports = PlayerSportValidation;
+module.exports = CardValidation;

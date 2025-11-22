@@ -9,8 +9,8 @@ server.get("/test", (req, res) => {
   res.send('<h1>Hello World!</h1>')
 })
 
-const PlayerSportRoutes = require('./routes/PlayerSportRoutes');
-server.use('/playersport', PlayerSportRoutes);
+const CardRoutes = require('./routes/CardRoutes');
+server.use('/card', CardRoutes);
 const SportRoutes = require('./routes/SportRoutes');
 server.use('/sport', SportRoutes);
 const PlayerRoutes = require('./routes/PlayerRoutes');
