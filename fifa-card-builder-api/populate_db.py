@@ -38,7 +38,7 @@ PLAYERS = [
 
 SPORT_DATA = {
     "name": "Vôlei",
-    "icon": "https://cdn-icons-png.flaticon.com/512/3311/3311579.png", # Ícone de bola de vôlei correto
+    "icon": "https://cdn-icons-png.flaticon.com/512/7788/7788863.png", # Ícone de bola de vôlei correto
     "attributeDefs": [
         {"key": "atk", "label": "Ataque", "min": 0, "max": 99, "default": 70},
         {"key": "blo", "label": "Bloqueio", "min": 0, "max": 99, "default": 60},
