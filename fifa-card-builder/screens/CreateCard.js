@@ -35,8 +35,11 @@ export default function CreateCard({ route, navigation }) {
   const [attributes, setAttributes] = useState({});
 
   useEffect(() => {
-    loadData();
-  }, []);
+    const unsubscribe = navigation.addListener('focus', () => {
+      loadData();
+    });
+    return unsubscribe;
+  }, [navigation]);
 
   const loadData = async () => {
     try {
@@ -175,15 +178,23 @@ export default function CreateCard({ route, navigation }) {
           <Text style={styles.sectionTitle}>Configurações</Text>
 
           <Text style={styles.label}>Jogador</Text>
-          <View style={styles.pickerContainer}>
-            <Picker
-              selectedValue={selectedPlayerId}
-              onValueChange={(itemValue) => setSelectedPlayerId(itemValue)}
+          <View style={styles.pickerRow}>
+            <View style={[styles.pickerContainer, { flex: 1 }]}>
+              <Picker
+                selectedValue={selectedPlayerId}
+                onValueChange={(itemValue) => setSelectedPlayerId(itemValue)}
+              >
+                {players.map(player => (
+                  <Picker.Item key={player._id} label={player.name} value={player._id} />
+                ))}
+              </Picker>
+            </View>
+            <TouchableOpacity 
+              style={styles.addPlayerButton}
+              onPress={() => navigation.navigate('CreatePlayer')}
             >
-              {players.map(player => (
-                <Picker.Item key={player._id} label={player.name} value={player._id} />
-              ))}
-            </Picker>
+              <Text style={styles.addPlayerButtonText}>+</Text>
+            </TouchableOpacity>
           </View>
 
           <Text style={styles.label}>Esporte</Text>
@@ -295,12 +306,30 @@ const styles = StyleSheet.create({
     marginBottom: 5,
     marginTop: 10,
   },
+  pickerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    marginBottom: 10,
+  },
   pickerContainer: {
     borderWidth: 1,
     borderColor: '#ddd',
     borderRadius: 8,
-    marginBottom: 10,
     backgroundColor: '#fafafa',
+  },
+  addPlayerButton: {
+    backgroundColor: '#28a745',
+    width: 50,
+    height: 50,
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  addPlayerButtonText: {
+    color: '#fff',
+    fontSize: 24,
+    fontWeight: 'bold',
   },
   input: {
     borderWidth: 1,

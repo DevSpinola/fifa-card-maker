@@ -3,6 +3,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import Home from './screens/Home';
 import ConsultCards from './screens/ConsultCards';
 import CreateCard from './screens/CreateCard';
+import CreatePlayer from './screens/CreatePlayer';
 
 const Stack = createNativeStackNavigator();
 
@@ -24,6 +25,11 @@ export default function App() {
           name="CreateCard" 
           component={CreateCard} 
           options={{ title: 'Nova Carta' }} 
+        />
+        <Stack.Screen 
+          name="CreatePlayer" 
+          component={CreatePlayer} 
+          options={{ title: 'Novo Jogador' }} 
         />
       </Stack.Navigator>
     </NavigationContainer>
