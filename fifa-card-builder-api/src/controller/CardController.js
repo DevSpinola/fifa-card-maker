@@ -6,7 +6,7 @@ class CardController {
   // Create a Card by merging sport defaults and validating values
   async create(req, res) {
     try {
-      const { player, sport, attributes = {} } = req.body;
+      const { player, sport, position, attributes = {} } = req.body;
 
       // Validation moved to middleware `CardValidation`.
       // Controller assumes input is valid and only computes overall + saves.
@@ -21,7 +21,7 @@ class CardController {
       }
 
       // create Card with provided attributes and overall
-      const card = new CardModel({ player, sport, attributes: attributes, overall });
+      const card = new CardModel({ player, sport, position, attributes: attributes, overall });
       const saved = await card.save();
       return res.status(201).json(saved);
     } catch (err) {
