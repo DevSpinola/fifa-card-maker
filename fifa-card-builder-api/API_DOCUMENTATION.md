@@ -1,176 +1,197 @@
-# FIFA-style Cards API
+# API de Cartas estilo FIFA
 
-This document describes the API implemented in this workspace. It covers models, validation rules, endpoints, and example requests.
+Este documento descreve a API implementada neste workspace. Ele cobre modelos, regras de validação, endpoints e exemplos de requisições.
 
-Base URL: `http://localhost:3000`
+**URL Base:** `http://localhost:3000`
 
-Run the server:
-```bash
-node src/index.js
-```
+## 🚀 Como Rodar
 
-Quick test:
-```bash
-curl http://localhost:3000/test
-```
+1. Instale as dependências:
+   ```bash
+   npm install
+   ```
 
----
+2. Inicie o servidor:
+   ```bash
+   npm start
+   ```
+   *O servidor rodará em modo de desenvolvimento usando nodemon.*
 
-## Models
-
-- `Player` (`src/model/PlayerModel.js`)
-  - `playerId` (string, unique)
-  - `name` (string, required)
-  - `photo` (string, required) — accepts a data URI or base64. Middleware normalizes to data URI.
-
-- `Sport` (`src/model/SportModel.js`)
-  - `sportId` (string, unique)
-  - `name` (string, required)
-  - `icon` (string, optional)
-  - `attributeDefs` (array) — metadata for front-end (keys, labels, min/max/default suggested values)
-
-- `PlayerSport` (`src/model/PlayerSportModel.js`)
-  - `playerSportId` (string, unique)
-  - `player` (ObjectId ref `Player`, required)
-  - `sport` (ObjectId ref `Sport`, required)
-  - `position` (string, optional)
-  - `overall` (number 0–100) — stored value; may be provided by client or computed by server
-  - `attributes` (object) — keys/values provided by the API/client
+3. Teste rápido de conectividade:
+   ```bash
+   curl http://localhost:3000/test
+   ```
 
 ---
 
-## Validation (middleware)
+## 🛠️ Scripts Utilitários
 
-- `PlayerValidation` (`src/middlewares/PlayerValidation.js`)
-  - `name`: required, string, min length 2
-  - `photo`: required, must be base64 or data URI; allowed MIME types: `image/png`, `image/jpeg`, `image/jpg`, `image/webp`, `image/gif`
-  - Enforces a max decoded image size of 2.5 MB and normalizes `req.body.photo` to a `data:<mime>;base64,<data>` form.
+### Popular Banco de Dados (`populate_db.py`)
+Existe um script Python na raiz deste projeto (`fifa-card-builder-api/populate_db.py`) que limpa o banco de dados e insere dados iniciais de Esportes (Futebol, Basquete, Vôlei, Tênis, Futebol Americano) com seus respectivos atributos e ícones.
 
-- `SportValidation` (`src/middlewares/SportValidation.js`)
-  - `name`: required, string, min length 2
-  - `icon`: optional string
-  - On `PUT /sport/:id`: checks `:id` ObjectId format and that sport exists.
-
-- `PlayerSportValidation` (`src/middlewares/PlayerSportValidation.js`)
-  - `player` and `sport`: required, valid ObjectId, must exist
-  - `attributes`: required object (not array), keys count must be between 3 and 6
-  - each attribute value: numeric 0..100 (backend validates, does not alter values)
-  - optional `overall`: if supplied, numeric 0..100 (validated)
-  - If `overall` is not provided, controller computes a simple average and stores it.
+**Como usar:**
+1. Certifique-se de ter Python instalado e a biblioteca `requests`.
+   ```bash
+   pip install requests
+   ```
+2. Com o servidor rodando (`npm start`), execute:
+   ```bash
+   python populate_db.py
+   ```
 
 ---
 
-## Endpoints
+## 📦 Modelos (Models)
 
-All requests/response bodies are JSON unless otherwise noted.
+- **`Player`** (`src/model/PlayerModel.js`)
+  - `playerId` (string, único)
+  - `name` (string, obrigatório)
+  - `photo` (string, obrigatório) — aceita Data URI ou base64. O middleware normaliza para Data URI.
 
-### Players
+- **`Sport`** (`src/model/SportModel.js`)
+  - `sportId` (string, único)
+  - `name` (string, obrigatório)
+  - `icon` (string, opcional) — URL ou Data URI do ícone do esporte.
+  - `attributeDefs` (array) — metadados para o front-end (chaves, labels, valores min/max/padrão).
 
-- `POST /player` — create a player
+- **`PlayerSport`** (`src/model/PlayerSportModel.js`)
+  - `playerSportId` (string, único)
+  - `player` (ObjectId ref `Player`, obrigatório)
+  - `sport` (ObjectId ref `Sport`, obrigatório)
+  - `position` (string, opcional)
+  - `overall` (número 0–100) — valor armazenado; pode ser fornecido pelo cliente ou calculado pelo servidor.
+  - `attributes` (objeto) — chaves/valores dos atributos fornecidos pela API ou cliente.
+
+---
+
+## 🛡️ Validação (Middlewares)
+
+- **`PlayerValidation`** (`src/middlewares/PlayerValidation.js`)
+  - `name`: obrigatório, string, tamanho mínimo 2.
+  - `photo`: obrigatório, deve ser base64 ou Data URI; tipos MIME permitidos: `image/png`, `image/jpeg`, `image/jpg`, `image/webp`, `image/gif`.
+  - Impõe um tamanho máximo de imagem decodificada de 2.5 MB e normaliza `req.body.photo` para o formato `data:<mime>;base64,<data>`.
+
+- **`SportValidation`** (`src/middlewares/SportValidation.js`)
+  - `name`: obrigatório, string, tamanho mínimo 2.
+  - `icon`: string opcional.
+  - Em `PUT /sport/:id`: verifica se o `:id` tem formato ObjectId válido e se o esporte existe.
+
+- **`PlayerSportValidation`** (`src/middlewares/PlayerSportValidation.js`)
+  - `player` e `sport`: obrigatórios, ObjectId válido, devem existir no banco.
+  - `attributes`: objeto obrigatório (não array), deve conter entre 3 e 6 chaves.
+  - Cada valor de atributo: numérico 0..100 (o backend valida, mas não altera os valores).
+  - `overall` (opcional): se fornecido, numérico 0..100 (validado).
+  - Se `overall` não for fornecido, o controller calcula uma média simples e armazena.
+
+---
+
+## 🔗 Endpoints
+
+Todos os corpos de requisição/resposta são JSON, a menos que indicado o contrário.
+
+### Jogadores (Players)
+
+- `POST /player` — criar um jogador
   - Middleware: `PlayerValidation`
-  - Body:
+  - Corpo:
     ```json
     {
-      "name": "Player Name",
-      "photo": "data:image/png;base64,AAAA..." // or raw base64
+      "name": "Nome do Jogador",
+      "photo": "data:image/png;base64,AAAA..." // ou base64 puro
     }
     ```
-  - Response: `201` created with Player object.
+  - Resposta: `201` Created com o objeto Player.
 
-- `GET /player` — list players
+- `GET /player` — listar jogadores
 
-- `GET /player/:id` — get player by id
+- `GET /player/:id` — obter jogador por id
 
-- `PUT /player/:id` — update player
+- `PUT /player/:id` — atualizar jogador
   - Middleware: `PlayerValidation`
 
-- `DELETE /player/:id` — delete player
+- `DELETE /player/:id` — deletar jogador
 
-### Sports
+### Esportes (Sports)
 
-- `POST /sport` — create sport
+- `POST /sport` — criar esporte
   - Middleware: `SportValidation`
-  - Body example:
+  - Exemplo de corpo:
     ```json
     {
-      "name": "Soccer",
-      "icon": "/icons/soccer.png",
+      "name": "Futebol",
+      "icon": "https://exemplo.com/icon.png",
       "attributeDefs": [
-        { "key": "pace", "label": "Pace", "min": 0, "max": 100, "default": 70 },
-        { "key": "shooting", "label": "Shooting", "min": 0, "max": 100, "default": 65 }
+        { "key": "pac", "label": "Ritmo", "min": 0, "max": 99, "default": 70 },
+        { "key": "sho", "label": "Chute", "min": 0, "max": 99, "default": 65 }
       ]
     }
     ```
 
-- `GET /sport` — list sports
-- `GET /sport/:id` — get sport (includes `attributeDefs`)
-- `PUT /sport/:id` — update sport (uses `SportValidation`)
-- `DELETE /sport/:id` — delete sport
+- `GET /sport` — listar esportes
+- `GET /sport/:id` — obter esporte (inclui `attributeDefs`)
+- `PUT /sport/:id` — atualizar esporte (usa `SportValidation`)
+- `DELETE /sport/:id` — deletar esporte
 
-### PlayerSport (cards)
+### Cartas (PlayerSport)
 
-- `POST /playersport` — create a player-sport card
+- `POST /playersport` — criar uma carta (vínculo jogador-esporte)
   - Middleware: `PlayerSportValidation`
-  - Body examples:
-    - Let server compute overall:
+  - Exemplos de corpo:
+    - Deixar o servidor calcular o overall:
       ```json
       {
         "player":"<playerObjectId>",
         "sport":"<sportObjectId>",
-        "attributes":{"pace":80,"shooting":77,"passing":75},
-        "position":"CAM"
+        "attributes":{"pac":80,"sho":77,"pas":75},
+        "position":"ATA"
       }
       ```
-    - Provide overall from client:
+    - Fornecer overall manualmente:
       ```json
       {
         "player":"<playerObjectId>",
         "sport":"<sportObjectId>",
-        "attributes":{"pace":80,"shooting":77,"passing":75},
-        "overall":77
+        "attributes":{"pac":80,"sho":77,"pas":75},
+        "overall":90
       }
       ```
-  - Rules:
-    - `attributes` must be an object with 3..6 keys
-    - values numeric 0..100 (validated)
-    - If `overall` provided it must be 0..100; otherwise server computes and stores rounded average
+  - Regras:
+    - `attributes` deve ser um objeto com 3 a 6 chaves.
+    - valores numéricos 0..100.
+    - Se `overall` for fornecido, deve ser 0..100; caso contrário, o servidor calcula a média arredondada.
 
-- `GET /playersport` — list all player-sport entries (populates `player` and `sport`)
+- `GET /playersport` — listar todas as cartas (popula os campos `player` e `sport`)
+- `DELETE /playersport/:id` — deletar uma carta
 
 ---
 
-## Example curl requests
+## 💻 Exemplos de Requisição (cURL)
 
-- Create player:
+- **Criar Jogador:**
 ```bash
 curl -X POST http://localhost:3000/player \
  -H "Content-Type: application/json" \
- -d '{"name":"John Doe","photo":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUg..."}'
+ -d '{"name":"Fulano da Silva","photo":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUg..."}'
 ```
 
-- Create sport:
+- **Criar Esporte:**
 ```bash
 curl -X POST http://localhost:3000/sport \
  -H "Content-Type: application/json" \
- -d '{"name":"Soccer","icon":"/icons/soccer.png","attributeDefs":[{"key":"pace","label":"Pace","min":0,"max":100,"default":70}]}'
+ -d '{"name":"Futebol","icon":"...","attributeDefs":[{"key":"pac","label":"Ritmo","min":0,"max":99,"default":70}]}'
 ```
 
-- Create player-sport (server computes overall):
+- **Criar Carta (Servidor calcula Overall):**
 ```bash
 curl -X POST http://localhost:3000/playersport \
  -H "Content-Type: application/json" \
- -d '{"player":"<playerId>","sport":"<sportId>","attributes":{"pace":80,"shooting":77,"passing":75},"position":"CAM"}'
+ -d '{"player":"<playerId>","sport":"<sportId>","attributes":{"pac":80,"sho":77,"pas":75},"position":"ATA"}'
 ```
 
 ---
 
-## Notes & Recommendations
+## 📝 Notas & Recomendações
 
-- Photo storage: currently photos are stored as data URIs in the DB. For production consider storing images on disk or cloud (S3) and saving only URLs in the DB.
-- Attribute handling: the backend validates attribute values and expects the frontend to provide the attributes object (3–6 keys). `attributeDefs` in `Sport` provide UI metadata.
-- Route naming: current routes are singular (`/player`, `/sport`, `/playersport`). Consider switching to plural (e.g., `/players`) for REST conventions.
-- Tests & seed data: consider adding a seed script for demo sports and unit tests for middleware.
-
----
-
-If you want, I can add a `seed.js` that inserts example sports (`Soccer`, `Basketball`, `Tennis`) with `attributeDefs`, or I can rename routes to plurals. Tell me which you'd like next.
+- **Armazenamento de Fotos:** Atualmente, as fotos são armazenadas como Data URIs (Base64) diretamente no banco de dados (MongoDB). Para produção, considere armazenar as imagens em disco ou nuvem (AWS S3, Firebase Storage) e salvar apenas as URLs no banco.
+- **Atributos:** O backend valida se os valores são numéricos, mas espera que o frontend envie o objeto de atributos correto (3–6 chaves). As definições (`attributeDefs`) no modelo `Sport` servem como metadados para a UI construir os formulários dinamicamente.
+- **Rotas:** As rotas atuais estão no singular (`/player`, `/sport`, `/playersport`).
