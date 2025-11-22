@@ -24,16 +24,17 @@ export default function CreateCard({ route, navigation }) {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   
-  // Data sources
+  // Estados para armazenar as listas de jogadores e esportes vindos da API
   const [players, setPlayers] = useState([]);
   const [sports, setSports] = useState([]);
 
-  // Form State
+  // Estados do formulário
   const [selectedPlayerId, setSelectedPlayerId] = useState('');
   const [selectedSportId, setSelectedSportId] = useState('');
   const [position, setPosition] = useState('');
   const [attributes, setAttributes] = useState({});
 
+  // Carrega os dados toda vez que a tela ganha foco
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
       loadData();
@@ -41,6 +42,7 @@ export default function CreateCard({ route, navigation }) {
     return unsubscribe;
   }, [navigation]);
 
+  // Busca jogadores e esportes na API
   const loadData = async () => {
     try {
       const [playersData, sportsData] = await Promise.all([
@@ -50,6 +52,7 @@ export default function CreateCard({ route, navigation }) {
       setPlayers(playersData);
       setSports(sportsData);
 
+      // Se estiver editando, preenche o formulário com os dados da carta existente
       if (isEditing) {
         const cardData = await getCardById(cardId);
         setSelectedPlayerId(cardData.player._id);
@@ -57,7 +60,7 @@ export default function CreateCard({ route, navigation }) {
         setPosition(cardData.position);
         setAttributes(cardData.attributes || {});
       } else {
-        // Defaults for new card
+        // Se for nova carta, seleciona o primeiro item das listas por padrão
         if (playersData.length > 0) setSelectedPlayerId(playersData[0]._id);
         if (sportsData.length > 0) setSelectedSportId(sportsData[0]._id);
       }
@@ -69,18 +72,19 @@ export default function CreateCard({ route, navigation }) {
     }
   };
 
-  // Derived state for the selected objects
+  // useMemo: Otimiza a busca do objeto jogador selecionado, evitando recálculos desnecessários
   const selectedPlayer = useMemo(() => 
     players.find(p => p._id === selectedPlayerId), 
     [players, selectedPlayerId]
   );
 
+  // useMemo: Otimiza a busca do objeto esporte selecionado
   const selectedSport = useMemo(() => 
     sports.find(s => s._id === selectedSportId), 
     [sports, selectedSportId]
   );
 
-  // Initialize attributes when sport changes (if creating new)
+  // Quando o esporte muda (e não estamos editando), reseta os atributos para os valores padrão daquele esporte
   useEffect(() => {
     if (selectedSport && !isEditing) {
       const initialAttrs = {};
@@ -89,9 +93,9 @@ export default function CreateCard({ route, navigation }) {
       });
       setAttributes(initialAttrs);
     }
-  }, [selectedSportId, isEditing]); // Only run on sport change if not editing initially to avoid overwrite
+  }, [selectedSportId, isEditing]); 
 
-  // Calculate overall for preview
+  // Calcula a média (Overall) em tempo real para o preview
   const previewOverall = useMemo(() => {
     const values = Object.values(attributes).map(v => Number(v) || 0);
     if (values.length === 0) return 0;
@@ -99,7 +103,7 @@ export default function CreateCard({ route, navigation }) {
     return Math.round(sum / values.length);
   }, [attributes]);
 
-  // Construct preview card object
+  // Objeto temporário para mostrar a carta no preview enquanto edita
   const previewCard = {
     player: selectedPlayer || { name: 'Player', photo: null },
     sport: selectedSport || { icon: null, attributeDefs: [] },
@@ -108,8 +112,8 @@ export default function CreateCard({ route, navigation }) {
     attributes: attributes
   };
 
+  // Atualiza o valor de um atributo específico (garantindo que fique entre 0 e 99)
   const handleAttributeChange = (key, value) => {
-    // Ensure value is between 0 and 99
     let numValue = parseInt(value);
     if (isNaN(numValue)) numValue = 0;
     if (numValue > 99) numValue = 99;
@@ -120,6 +124,7 @@ export default function CreateCard({ route, navigation }) {
     }));
   };
 
+  // Salva ou atualiza a carta no backend
   const handleSave = async () => {
     if (!selectedPlayerId || !selectedSportId) {
       Alert.alert("Erro", "Selecione um jogador e um esporte.");
@@ -161,19 +166,20 @@ export default function CreateCard({ route, navigation }) {
   }
 
   return (
+    // KeyboardAvoidingView evita que o teclado cubra os campos de input
     <KeyboardAvoidingView 
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       style={styles.container}
     >
       <ScrollView contentContainerStyle={styles.scrollContent}>
         
-        {/* Preview Section */}
+        {/* Seção de Preview da Carta */}
         <View style={styles.previewContainer}>
           <Text style={styles.sectionTitle}>Preview</Text>
           <FifaCard card={previewCard} />
         </View>
 
-        {/* Form Section */}
+        {/* Formulário de Configuração */}
         <View style={styles.formContainer}>
           <Text style={styles.sectionTitle}>Configurações</Text>
 
@@ -202,7 +208,7 @@ export default function CreateCard({ route, navigation }) {
             <Picker
               selectedValue={selectedSportId}
               onValueChange={(itemValue) => setSelectedSportId(itemValue)}
-              enabled={!isEditing} // Disable sport change on edit to simplify logic
+              enabled={!isEditing} // Desabilita troca de esporte na edição para simplificar
             >
               {sports.map(sport => (
                 <Picker.Item key={sport._id} label={sport.name} value={sport._id} />
@@ -220,6 +226,7 @@ export default function CreateCard({ route, navigation }) {
             autoCapitalize="characters"
           />
 
+          {/* Renderiza os inputs de atributos dinamicamente baseados no esporte */}
           {selectedSport && (
             <View style={styles.attributesContainer}>
               <Text style={styles.subTitle}>Atributos ({selectedSport.name})</Text>

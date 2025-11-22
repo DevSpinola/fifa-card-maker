@@ -16,14 +16,18 @@ import {
   getPlayerById,
 } from "../services/PlayerService";
 
-const REMOVE_BG_API_KEY = "1VCKK78VENhyoxBYFTSx3UbY"; // Substitua pela sua chave da API remove.bg
+// Chave da API remove.bg (usada para remover o fundo das imagens)
+const REMOVE_BG_API_KEY = "1VCKK78VENhyoxBYFTSx3UbY"; 
 
 export default function CreatePlayer({ navigation, route }) {
   const [name, setName] = useState("");
   const [photo, setPhoto] = useState(null);
   const [processingImage, setProcessingImage] = useState(false);
+  
+  // Verifica se estamos editando um jogador existente
   const playerId = route.params ? route.params.playerId : null;
 
+  // Se houver um ID, busca os dados do jogador para preencher o formulário
   useEffect(() => {
     if (playerId) {
       getPlayerById(playerId)
@@ -38,7 +42,7 @@ export default function CreatePlayer({ navigation, route }) {
     }
   }, [playerId]);
 
-  // Função para converter URI da imagem para Base64
+  // Converte uma imagem (URI) para Base64, formato necessário para salvar no banco
   const convertToBase64 = async (uri, mimeType = 'image/jpeg') => {
     try {
       console.log("Iniciando conversão para Base64...");
@@ -51,11 +55,10 @@ export default function CreatePlayer({ navigation, route }) {
           console.log("Conversão concluída!");
           let result = reader.result;
           
-          // Se o resultado vier como application/octet-stream ou sem tipo, forçamos o tipo conhecido
+          // Garante que o prefixo do Base64 (data:image/...) esteja correto
           if (typeof result === 'string') {
              const parts = result.split(',');
              if (parts.length === 2) {
-                // Reconstrói o cabeçalho data URI com o mimeType correto
                 result = `data:${mimeType};base64,${parts[1]}`;
              }
           }
@@ -74,7 +77,7 @@ export default function CreatePlayer({ navigation, route }) {
     }
   };
 
-  // Função para remover o fundo da imagem
+  // Envia a imagem para a API remove.bg para retirar o fundo
   const removeBg = async (imageUri) => {
     const formData = new FormData();
     formData.append("size", "auto");
@@ -95,12 +98,11 @@ export default function CreatePlayer({ navigation, route }) {
       return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.onloadend = () => {
-            // A API do remove.bg retorna PNG por padrão
+            // A API retorna PNG (fundo transparente)
             let result = reader.result;
             if (typeof result === 'string') {
                 const parts = result.split(',');
                 if (parts.length === 2) {
-                   // Força image/png pois é o retorno do remove.bg
                    result = `data:image/png;base64,${parts[1]}`;
                 }
             }
@@ -114,16 +116,16 @@ export default function CreatePlayer({ navigation, route }) {
     }
   };
 
+  // Abre a galeria para o usuário escolher uma foto
   const pickImage = async () => {
     console.log("Botão de selecionar foto clicado!");
     
     try {
       let result = await ImagePicker.launchImageLibraryAsync({
         allowsEditing: true,
-        aspect: [1, 1], // Mantendo quadrado para cards
-        quality: 0.5, // Reduzindo ainda mais - 50%
+        aspect: [1, 1], // Força corte quadrado
+        quality: 0.5, // Reduz qualidade para economizar dados
         base64: false,
-        // Configurações de redimensionamento
         exif: false,
         allowsMultipleSelection: false,
       });
@@ -133,7 +135,7 @@ export default function CreatePlayer({ navigation, route }) {
       if (!result.canceled) {
         const asset = result.assets[0];
 
-        // Validação prévia de tamanho (2.5MB) para evitar chamadas desnecessárias à API
+        // Valida tamanho do arquivo antes de processar (limite 2.5MB)
         if (asset.fileSize && asset.fileSize > 2.5 * 1024 * 1024) {
           Alert.alert(
             "Aviso", 
@@ -144,7 +146,6 @@ export default function CreatePlayer({ navigation, route }) {
 
         setProcessingImage(true);
         try {
-          // Tenta remover o fundo
           console.log("Tentando remover o fundo...");
           let finalImageBase64;
           
@@ -152,20 +153,21 @@ export default function CreatePlayer({ navigation, route }) {
             if (REMOVE_BG_API_KEY === "INSERT_YOUR_API_KEY_HERE") {
                throw new Error("API Key não configurada");
             }
+            // Tenta remover o fundo
             finalImageBase64 = await removeBg(asset.uri);
             console.log("Fundo removido com sucesso!");
           } catch (bgError) {
-            console.warn("Falha ao remover fundo (ou chave não configurada), usando imagem original:", bgError.message);
-            Alert.alert("Aviso", "Não foi possível remover o fundo (verifique a API Key). Usando imagem original.");
-            // Passa o mimeType original ou jpeg como fallback
+            // Se falhar (ex: sem internet ou cota excedida), usa a imagem original
+            console.warn("Falha ao remover fundo, usando imagem original:", bgError.message);
+            Alert.alert("Aviso", "Não foi possível remover o fundo. Usando imagem original.");
             finalImageBase64 = await convertToBase64(asset.uri, asset.mimeType || 'image/jpeg');
           }
 
-          // Verificar tamanho da string Base64
+          // Verifica tamanho final da string Base64
           const sizeInKB = Math.round((finalImageBase64.length * 3) / 4 / 1024);
           console.log(`Tamanho da imagem: ${sizeInKB}KB`);
           
-          if (sizeInKB > 2500) { // Aumentei para 2.5MB para bater com o backend
+          if (sizeInKB > 2500) {
             Alert.alert("Aviso", `Imagem muito grande (${sizeInKB}KB). Tente uma imagem menor.`);
             return;
           }
@@ -184,23 +186,17 @@ export default function CreatePlayer({ navigation, route }) {
     }
   };
 
+  // Salva um novo jogador
   const handleCreate = async () => {
     if (!name || !photo) {
       Alert.alert("Erro", "Todos os campos são obrigatórios.");
       return;
     }
     
-    // Validações básicas no frontend
     if (name.length < 2) {
       Alert.alert("Erro", "Nome deve ter pelo menos 2 caracteres.");
       return;
     }
-    
-    console.log("Dados a serem enviados:", {
-      name: name.trim(),
-      photoTamanho: photo ? `${Math.round((photo.length * 3) / 4 / 1024)}KB` : "Sem foto",
-      photoInicio: photo ? photo.substring(0, 50) + "..." : "Sem foto"
-    });
     
     try {
       const result = await createPlayer({ 
@@ -212,14 +208,12 @@ export default function CreatePlayer({ navigation, route }) {
       navigation.goBack();
     } catch (error) {
       console.error("Erro completo:", error);
-      console.error("Resposta da API:", error.response?.data);
-      console.error("Status:", error.response?.status);
-      
       const errorMessage = error.response?.data?.erro || error.message || "Erro desconhecido";
       Alert.alert("Erro", `Não foi possível cadastrar o jogador: ${errorMessage}`);
     }
   };
 
+  // Atualiza um jogador existente
   const handleUpdate = async () => {
     if (!name || !photo) {
       Alert.alert("Erro", "Todos os campos são obrigatórios.");
@@ -254,6 +248,8 @@ export default function CreatePlayer({ navigation, route }) {
           <Text style={styles.photoButtonText}>📷 Selecionar Foto</Text>
         )}
       </TouchableOpacity>
+      
+      {/* Exibe a foto selecionada */}
       {photo && (
         <Image 
           source={{ uri: photo.startsWith('data:') ? photo : photo }} 

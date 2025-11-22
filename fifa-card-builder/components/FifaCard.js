@@ -7,6 +7,7 @@ const CARD_WIDTH = width * 0.85;
 const CARD_ASPECT_RATIO = 1.48; 
 const CARD_HEIGHT = CARD_WIDTH * CARD_ASPECT_RATIO;
 
+// Imagens de fundo para cada tipo de carta
 const CARD_TEMPLATES = {
   gold: require('../assets/gold.png'),
   silver: require('../assets/silver.png'),
@@ -17,6 +18,7 @@ export default function FifaCardPro({ card }) {
   if (!card) return null;
   const { player, sport, position, overall, attributes } = card;
 
+  // Define o tipo da carta (Ouro, Prata, Bronze) baseado no Overall
   const getCardType = (rating) => {
     const numRating = Number(rating);
     if (numRating >= 75) return 'gold';
@@ -27,16 +29,19 @@ export default function FifaCardPro({ card }) {
   const cardType = getCardType(overall);
   const bgSource = CARD_TEMPLATES[cardType];
 
-  // Função para pegar label curto (3 letras)
+  // Função para pegar label curto (3 letras) do atributo
   const getAttributeLabel = (key) => {
     const def = sport?.attributeDefs?.find((d) => d.key === key);
     return def ? def.label.substring(0, 3).toUpperCase() : key.substring(0, 3).toUpperCase();
   };
 
+  // Define a ordem padrão dos atributos para Futebol (estilo FIFA)
   const col1Keys = ['pac', 'sho', 'pas']; 
   const col2Keys = ['dri', 'def', 'phy'];
 
   const allKeys = Object.keys(attributes || {});
+  
+  // Se for futebol, usa a ordem padrão. Se for outro esporte, divide os atributos em 2 colunas automaticamente.
   const leftColumn = col1Keys.every(k => allKeys.includes(k)) ? col1Keys : allKeys.slice(0, 3);
   const rightColumn = col2Keys.every(k => allKeys.includes(k)) ? col2Keys : allKeys.slice(3, 6);
 
@@ -44,9 +49,10 @@ export default function FifaCardPro({ card }) {
 
   return (
     <View style={styles.container}>
+      {/* CAMADA 1: Fundo da Carta */}
       <ImageBackground source={bgSource} style={styles.cardBackground} resizeMode="contain">
         
-        {/* CAMADA 2: FOTO DO JOGADOR */}
+        {/* CAMADA 2: Foto do Jogador (atrás dos textos) */}
         <View style={styles.playerImageContainer}>
            <Image 
              source={{ uri: player.photo }} 
@@ -55,10 +61,10 @@ export default function FifaCardPro({ card }) {
            />
         </View>
 
-        {/* CAMADA 3: INFORMAÇÕES */}
+        {/* CAMADA 3: Informações (Textos e Ícones) */}
         <View style={styles.overlayContainer}>
           
-          {/* LADO ESQUERDO: Rating, Posição, Nação/Clube */}
+          {/* LADO ESQUERDO: Rating, Posição, Ícone do Esporte */}
           <View style={styles.infoLeftColumn}>
             <Text style={[styles.ratingText, { color: textColor }]}>{overall}</Text>
             <Text style={[styles.positionText, { color: textColor }]}>{position?.toUpperCase()}</Text>
@@ -80,9 +86,9 @@ export default function FifaCardPro({ card }) {
             <View style={[styles.nameDivider, { backgroundColor: textColor }]} />
           </View>
 
-          {/* GRID DE ATRIBUTOS */}
+          {/* GRID DE ATRIBUTOS (2 Colunas) */}
           <View style={styles.attributesContainer}>
-             {/* Coluna Esquerda (Alinhada à direita, perto da linha) */}
+             {/* Coluna Esquerda */}
              <View style={[styles.attrColumn, { alignItems: 'flex-end', paddingRight: 8 }]}>
                 {leftColumn.map(key => (
                   <View key={key} style={styles.attrItem}>
@@ -95,7 +101,7 @@ export default function FifaCardPro({ card }) {
              {/* Divisor Vertical Central */}
              <View style={[styles.verticalSeparator, { backgroundColor: textColor }]} />
 
-             {/* Coluna Direita (Alinhada à esquerda, perto da linha) */}
+             {/* Coluna Direita */}
              <View style={[styles.attrColumn, { alignItems: 'flex-start', paddingLeft: 8 }]}>
                 {rightColumn.map(key => (
                   <View key={key} style={styles.attrItem}>

@@ -8,14 +8,18 @@ import { useIsFocused } from '@react-navigation/native';
 export default function ConsultCards({ navigation }) {
   const [cards, setCards] = useState([]);
   const [loading, setLoading] = useState(true);
+  
+  // Hook que detecta se a tela está em foco (visível para o usuário)
   const isFocused = useIsFocused();
 
+  // Recarrega a lista de cartas sempre que o usuário entra nesta tela
   useEffect(() => {
     if (isFocused) {
       fetchCards();
     }
   }, [isFocused]);
 
+  // Busca todas as cartas cadastradas no backend
   const fetchCards = async () => {
     try {
       const data = await getCards();
@@ -27,6 +31,7 @@ export default function ConsultCards({ navigation }) {
     }
   };
 
+  // Exibe um alerta de confirmação antes de excluir uma carta
   const handleDelete = (id) => {
     Alert.alert(
       "Excluir Carta",
@@ -39,7 +44,7 @@ export default function ConsultCards({ navigation }) {
           onPress: async () => {
             try {
               await deleteCard(id);
-              fetchCards();
+              fetchCards(); // Atualiza a lista após a exclusão
             } catch (error) {
               Alert.alert("Erro", "Não foi possível excluir a carta.");
             }
@@ -59,12 +64,16 @@ export default function ConsultCards({ navigation }) {
 
   return (
     <View style={styles.container}>
+      {/* FlatList é otimizado para listas longas */}
       <FlatList
         data={cards}
         keyExtractor={(item) => item._id}
         renderItem={({ item }) => (
           <View style={styles.cardWrapper}>
+            {/* Renderiza o componente visual da carta */}
             <FifaCard card={item} />
+            
+            {/* Botões de ação (Editar e Excluir) */}
             <View style={styles.actionsContainer}>
               <TouchableOpacity 
                 style={[styles.actionButton, styles.editButton]} 
