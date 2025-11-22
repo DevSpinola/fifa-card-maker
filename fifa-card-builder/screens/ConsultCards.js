@@ -1,15 +1,20 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, FlatList, ActivityIndicator } from 'react-native';
-import { getCards } from '../services/CardService';
+import { View, Text, StyleSheet, FlatList, ActivityIndicator, TouchableOpacity, Alert } from 'react-native';
+import { getCards, deleteCard } from '../services/CardService';
 import FifaCard from '../components/FifaCard';
+import { MaterialIcons } from '@expo/vector-icons';
+import { useIsFocused } from '@react-navigation/native';
 
-export default function ConsultCards() {
+export default function ConsultCards({ navigation }) {
   const [cards, setCards] = useState([]);
   const [loading, setLoading] = useState(true);
+  const isFocused = useIsFocused();
 
   useEffect(() => {
-    fetchCards();
-  }, []);
+    if (isFocused) {
+      fetchCards();
+    }
+  }, [isFocused]);
 
   const fetchCards = async () => {
     try {
@@ -20,6 +25,28 @@ export default function ConsultCards() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleDelete = (id) => {
+    Alert.alert(
+      "Excluir Carta",
+      "Tem certeza que deseja excluir esta carta?",
+      [
+        { text: "Cancelar", style: "cancel" },
+        { 
+          text: "Excluir", 
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await deleteCard(id);
+              fetchCards();
+            } catch (error) {
+              Alert.alert("Erro", "Não foi possível excluir a carta.");
+            }
+          }
+        }
+      ]
+    );
   };
 
   if (loading) {
@@ -35,7 +62,25 @@ export default function ConsultCards() {
       <FlatList
         data={cards}
         keyExtractor={(item) => item._id}
-        renderItem={({ item }) => <FifaCard card={item} />}
+        renderItem={({ item }) => (
+          <View style={styles.cardWrapper}>
+            <FifaCard card={item} />
+            <View style={styles.actionsContainer}>
+              <TouchableOpacity 
+                style={[styles.actionButton, styles.editButton]} 
+                onPress={() => navigation.navigate('CreateCard', { cardId: item._id })}
+              >
+                <MaterialIcons name="edit" size={24} color="#fff" />
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={[styles.actionButton, styles.deleteButton]} 
+                onPress={() => handleDelete(item._id)}
+              >
+                <MaterialIcons name="delete" size={24} color="#fff" />
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
         contentContainerStyle={styles.listContent}
         ListEmptyComponent={
           <View style={styles.center}>
@@ -65,5 +110,32 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 18,
     color: '#666',
+  },
+  cardWrapper: {
+    alignItems: 'center',
+    marginBottom: 30,
+  },
+  actionsContainer: {
+    flexDirection: 'row',
+    marginTop: -10,
+    gap: 15,
+  },
+  actionButton: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 5,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+  },
+  editButton: {
+    backgroundColor: '#007AFF',
+  },
+  deleteButton: {
+    backgroundColor: '#FF3B30',
   },
 });
