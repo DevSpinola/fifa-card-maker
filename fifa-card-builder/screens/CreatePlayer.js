@@ -16,7 +16,7 @@ import {
   getPlayerById,
 } from "../services/PlayerService";
 
-const REMOVE_BG_API_KEY = "INSERT_YOUR_API_KEY_HERE"; // Substitua pela sua chave da API remove.bg
+const REMOVE_BG_API_KEY = "1VCKK78VENhyoxBYFTSx3UbY"; // Substitua pela sua chave da API remove.bg
 
 export default function CreatePlayer({ navigation, route }) {
   const [name, setName] = useState("");
@@ -39,7 +39,7 @@ export default function CreatePlayer({ navigation, route }) {
   }, [playerId]);
 
   // Função para converter URI da imagem para Base64
-  const convertToBase64 = async (uri) => {
+  const convertToBase64 = async (uri, mimeType = 'image/jpeg') => {
     try {
       console.log("Iniciando conversão para Base64...");
       const response = await fetch(uri);
@@ -49,7 +49,18 @@ export default function CreatePlayer({ navigation, route }) {
         const reader = new FileReader();
         reader.onloadend = () => {
           console.log("Conversão concluída!");
-          resolve(reader.result);
+          let result = reader.result;
+          
+          // Se o resultado vier como application/octet-stream ou sem tipo, forçamos o tipo conhecido
+          if (typeof result === 'string') {
+             const parts = result.split(',');
+             if (parts.length === 2) {
+                // Reconstrói o cabeçalho data URI com o mimeType correto
+                result = `data:${mimeType};base64,${parts[1]}`;
+             }
+          }
+          
+          resolve(result);
         };
         reader.onerror = (error) => {
           console.error("Erro no FileReader:", error);
@@ -60,6 +71,46 @@ export default function CreatePlayer({ navigation, route }) {
     } catch (error) {
       console.error("Erro ao converter imagem para Base64:", error);
       throw error;
+    }
+  };
+
+  // Função para remover o fundo da imagem
+  const removeBg = async (imageUri) => {
+    const formData = new FormData();
+    formData.append("size", "auto");
+    formData.append("image_file", {
+      uri: imageUri,
+      name: "image.jpg",
+      type: "image/jpeg",
+    });
+
+    const response = await fetch("https://api.remove.bg/v1.0/removebg", {
+      method: "POST",
+      headers: { "X-Api-Key": REMOVE_BG_API_KEY },
+      body: formData,
+    });
+
+    if (response.ok) {
+      const blob = await response.blob();
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            // A API do remove.bg retorna PNG por padrão
+            let result = reader.result;
+            if (typeof result === 'string') {
+                const parts = result.split(',');
+                if (parts.length === 2) {
+                   // Força image/png pois é o retorno do remove.bg
+                   result = `data:image/png;base64,${parts[1]}`;
+                }
+            }
+            resolve(result);
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
+    } else {
+      throw new Error(`${response.status}: ${response.statusText}`);
     }
   };
 
@@ -80,25 +131,41 @@ export default function CreatePlayer({ navigation, route }) {
       console.log("Resultado do ImagePicker:", result);
       
       if (!result.canceled) {
+        setProcessingImage(true);
         try {
-          // Converte a imagem para Base64
-          console.log("Convertendo imagem para Base64...");
-          const base64Image = await convertToBase64(result.assets[0].uri);
+          // Tenta remover o fundo
+          console.log("Tentando remover o fundo...");
+          let finalImageBase64;
+          const asset = result.assets[0];
           
+          try {
+            if (REMOVE_BG_API_KEY === "INSERT_YOUR_API_KEY_HERE") {
+               throw new Error("API Key não configurada");
+            }
+            finalImageBase64 = await removeBg(asset.uri);
+            console.log("Fundo removido com sucesso!");
+          } catch (bgError) {
+            console.warn("Falha ao remover fundo (ou chave não configurada), usando imagem original:", bgError.message);
+            Alert.alert("Aviso", "Não foi possível remover o fundo (verifique a API Key). Usando imagem original.");
+            // Passa o mimeType original ou jpeg como fallback
+            finalImageBase64 = await convertToBase64(asset.uri, asset.mimeType || 'image/jpeg');
+          }
+
           // Verificar tamanho da string Base64
-          const sizeInKB = Math.round((base64Image.length * 3) / 4 / 1024);
+          const sizeInKB = Math.round((finalImageBase64.length * 3) / 4 / 1024);
           console.log(`Tamanho da imagem: ${sizeInKB}KB`);
           
-          if (sizeInKB > 500) { // Se maior que 500KB
+          if (sizeInKB > 2500) { // Aumentei para 2.5MB para bater com o backend
             Alert.alert("Aviso", `Imagem muito grande (${sizeInKB}KB). Tente uma imagem menor.`);
             return;
           }
           
-          setPhoto(base64Image);
-          console.log("Imagem convertida com sucesso!");
+          setPhoto(finalImageBase64);
         } catch (error) {
-          console.error("Erro na conversão:", error);
+          console.error("Erro no processamento da imagem:", error);
           Alert.alert("Erro", "Não foi possível processar a imagem.");
+        } finally {
+          setProcessingImage(false);
         }
       }
     } catch (error) {
@@ -170,8 +237,12 @@ export default function CreatePlayer({ navigation, route }) {
       />
 
       <Text style={styles.label}>Foto:</Text>
-      <TouchableOpacity style={styles.photoButton} onPress={pickImage}>
-        <Text style={styles.photoButtonText}>📷 Selecionar Foto</Text>
+      <TouchableOpacity style={styles.photoButton} onPress={pickImage} disabled={processingImage}>
+        {processingImage ? (
+          <ActivityIndicator color="#fff" />
+        ) : (
+          <Text style={styles.photoButtonText}>📷 Selecionar Foto (Remove BG)</Text>
+        )}
       </TouchableOpacity>
       {photo && (
         <Image 
