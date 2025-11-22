@@ -39,6 +39,53 @@ class CardController {
       return res.status(500).json(err);
     }
   }
+
+  async getById(req, res) {
+    try {
+      const { id } = req.params;
+      const card = await CardModel.findById(id).populate('player').populate('sport');
+      if (!card) return res.status(404).json({ error: 'Card not found' });
+      return res.status(200).json(card);
+    } catch (err) {
+      return res.status(500).json({ error: err.message });
+    }
+  }
+
+  async update(req, res) {
+    try {
+      const { id } = req.params;
+      const { player, sport, position, attributes = {}, overall: manualOverall } = req.body;
+
+      // Recalculate overall if attributes are present
+      let overall = manualOverall;
+      if (typeof manualOverall === 'undefined' || manualOverall === null) {
+         if (Object.keys(attributes).length > 0) {
+            const vals = Object.values(attributes).map((v) => Number(v));
+            overall = vals.length ? Math.round(vals.reduce((a, b) => a + b, 0) / vals.length) : 0;
+         }
+      }
+
+      const updateData = { player, sport, position, attributes };
+      if (overall !== undefined) updateData.overall = overall;
+
+      const card = await CardModel.findByIdAndUpdate(id, updateData, { new: true }).populate('player').populate('sport');
+      if (!card) return res.status(404).json({ error: 'Card not found' });
+      return res.status(200).json(card);
+    } catch (err) {
+      return res.status(500).json({ error: err.message });
+    }
+  }
+
+  async delete(req, res) {
+    try {
+      const { id } = req.params;
+      const card = await CardModel.findByIdAndDelete(id);
+      if (!card) return res.status(404).json({ error: 'Card not found' });
+      return res.status(200).json({ message: 'Card deleted successfully' });
+    } catch (err) {
+      return res.status(500).json({ error: err.message });
+    }
+  }
 }
 
 module.exports = new CardController();

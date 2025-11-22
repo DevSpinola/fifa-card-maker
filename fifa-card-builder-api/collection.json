@@ -1,0 +1,429 @@
+{
+	"info": {
+		"_postman_id": "e2b8f9a1-5b2a-4e8c-9d1f-123456789abc",
+		"name": "FIFA Card Builder API",
+		"description": "Collection gerada para a API do FIFA Card Builder, cobrindo Players, Sports e Cards.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Players",
+			"item": [
+				{
+					"name": "Listar Todos Players",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/player",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"player"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Obter Player por ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/player/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"player",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "ID_DO_PLAYER_AQUI",
+									"description": "ID do MongoDB do player"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Criar Player",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Lionel Messi\",\n    \"photo\": \"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mnk5+8HAAQDAYS8O9MjAAAAAElFTkSuQmCC\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/player",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"player"
+							]
+						},
+						"description": "Requer 'name' e 'photo' (Base64 ou Data URI)."
+					},
+					"response": []
+				},
+				{
+					"name": "Atualizar Player",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Lionel Messi (Updated)\",\n    \"photo\": \"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/player/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"player",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "ID_DO_PLAYER_AQUI"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Deletar Player",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/player/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"player",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "ID_DO_PLAYER_AQUI"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Sports",
+			"item": [
+				{
+					"name": "Listar Todos Sports",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/sport",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"sport"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Obter Sport por ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/sport/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"sport",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "ID_DO_SPORT_AQUI"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Criar Sport",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Futebol\",\n    \"icon\": \"https://cdn-icons-png.flaticon.com/512/53/53283.png\",\n    \"attributeDefs\": [\n        { \"key\": \"pac\", \"label\": \"Ritmo\", \"min\": 0, \"max\": 99, \"default\": 70 },\n        { \"key\": \"sho\", \"label\": \"Chute\", \"min\": 0, \"max\": 99, \"default\": 60 },\n        { \"key\": \"pas\", \"label\": \"Passe\", \"min\": 0, \"max\": 99, \"default\": 65 },\n        { \"key\": \"dri\", \"label\": \"Drible\", \"min\": 0, \"max\": 99, \"default\": 75 },\n        { \"key\": \"def\", \"label\": \"Defesa\", \"min\": 0, \"max\": 99, \"default\": 40 },\n        { \"key\": \"phy\", \"label\": \"Físico\", \"min\": 0, \"max\": 99, \"default\": 70 }\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/sport",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"sport"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Atualizar Sport",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Futebol Editado\",\n    \"icon\": \"https://cdn-icons-png.flaticon.com/512/53/53283.png\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/sport/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"sport",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "ID_DO_SPORT_AQUI"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Deletar Sport",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/sport/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"sport",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "ID_DO_SPORT_AQUI"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Cards",
+			"item": [
+				{
+					"name": "Listar Todos Cards",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/card",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"card"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Criar Card",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"player\": \"COLE_O_ID_DO_PLAYER_AQUI\",\n    \"sport\": \"COLE_O_ID_DO_ESPORTE_AQUI\",\n    \"position\": \"ATA\",\n    \"attributes\": {\n        \"pac\": 85,\n        \"sho\": 92,\n        \"pas\": 88,\n        \"dri\": 90,\n        \"def\": 45,\n        \"phy\": 75\n    },\n    \"overall\": 91\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/card",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"card"
+							]
+						},
+						"description": "Cria uma carta relacionando um Player existente a um Sport existente. As chaves em 'attributes' devem corresponder ao definido no Sport."
+					},
+					"response": []
+				},
+				{
+					"name": "Obter Card por ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/card/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"card",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "ID_DO_CARD_AQUI"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Atualizar Card",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"player\": \"COLE_O_ID_DO_PLAYER_AQUI\",\n    \"sport\": \"COLE_O_ID_DO_ESPORTE_AQUI\",\n    \"position\": \"MEI\",\n    \"attributes\": {\n        \"pac\": 80,\n        \"sho\": 85,\n        \"pas\": 90,\n        \"dri\": 88,\n        \"def\": 50,\n        \"phy\": 70\n    },\n    \"overall\": 88\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/card/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"card",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "ID_DO_CARD_AQUI"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Deletar Card",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/card/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"card",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "ID_DO_CARD_AQUI"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Utils",
+			"item": [
+				{
+					"name": "Test Connection",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/test",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"test"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:3000",
+			"type": "string"
+		}
+	]
+}
