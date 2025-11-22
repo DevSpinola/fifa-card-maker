@@ -103,7 +103,7 @@ export default function CreateCard({ route, navigation }) {
   const previewCard = {
     player: selectedPlayer || { name: 'Player', photo: null },
     sport: selectedSport || { icon: null, attributeDefs: [] },
-    position: position || 'POS',
+    position: position || null,
     overall: previewOverall,
     attributes: attributes
   };
