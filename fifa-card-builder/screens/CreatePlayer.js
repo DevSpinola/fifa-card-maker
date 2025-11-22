@@ -251,7 +251,7 @@ export default function CreatePlayer({ navigation, route }) {
         {processingImage ? (
           <ActivityIndicator color="#fff" />
         ) : (
-          <Text style={styles.photoButtonText}>📷 Selecionar Foto (Remove BG)</Text>
+          <Text style={styles.photoButtonText}>📷 Selecionar Foto</Text>
         )}
       </TouchableOpacity>
       {photo && (
