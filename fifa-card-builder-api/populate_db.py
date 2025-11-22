@@ -36,18 +36,7 @@ PLAYERS = [
     }
 ]
 
-SPORT_DATA = {
-    "name": "Vôlei",
-    "icon": "https://cdn-icons-png.flaticon.com/512/7788/7788863.png", # Ícone de bola de vôlei correto
-    "attributeDefs": [
-        {"key": "atk", "label": "Ataque", "min": 0, "max": 99, "default": 70},
-        {"key": "blo", "label": "Bloqueio", "min": 0, "max": 99, "default": 60},
-        {"key": "sac", "label": "Saque", "min": 0, "max": 99, "default": 65},
-        {"key": "def", "label": "Defesa", "min": 0, "max": 99, "default": 70},
-        {"key": "lev", "label": "Levantamento", "min": 0, "max": 99, "default": 60},
-        {"key": "fis", "label": "Físico", "min": 0, "max": 99, "default": 75}
-    ]
-}
+
 
 POSITIONS = ["PON", "OPO", "CEN", "LEV", "LIB"]
 
@@ -66,18 +55,81 @@ def create_player(player_data):
         print(f"Error creating player {player_data['name']}: {e}")
         return None
 
-def create_sport():
-    try:
-        response = requests.post(f"{BASE_URL}/sport", json=SPORT_DATA)
-        response.raise_for_status()
-        data = response.json()
-        print(f"Sport created: {data['name']} (ID: {data['_id']})")
-        return data['_id']
-    except requests.exceptions.RequestException as e:
-        print(f"Error creating sport: {e}")
-        # Tentar buscar se já existe (opcional, mas bom para re-execução)
-        # Aqui assumimos criação nova para simplificar
-        return None
+SPORTS_DATA = [
+    {
+        "name": "Vôlei",
+        "icon": "https://cdn-icons-png.flaticon.com/512/7788/7788863.png",
+        "attributeDefs": [
+            {"key": "atk", "label": "Ataque", "min": 0, "max": 99, "default": 70},
+            {"key": "blo", "label": "Bloqueio", "min": 0, "max": 99, "default": 60},
+            {"key": "sac", "label": "Saque", "min": 0, "max": 99, "default": 65},
+            {"key": "def", "label": "Defesa", "min": 0, "max": 99, "default": 70},
+            {"key": "lev", "label": "Levantamento", "min": 0, "max": 99, "default": 60},
+            {"key": "fis", "label": "Físico", "min": 0, "max": 99, "default": 75}
+        ]
+    },
+    {
+        "name": "Futebol",
+        "icon": "https://cdn-icons-png.flaticon.com/512/53/53283.png",
+        "attributeDefs": [
+            {"key": "pac", "label": "Ritmo", "min": 0, "max": 99, "default": 75},
+            {"key": "sho", "label": "Chute", "min": 0, "max": 99, "default": 70},
+            {"key": "pas", "label": "Passe", "min": 0, "max": 99, "default": 70},
+            {"key": "dri", "label": "Drible", "min": 0, "max": 99, "default": 75},
+            {"key": "def", "label": "Defesa", "min": 0, "max": 99, "default": 50},
+            {"key": "phy", "label": "Físico", "min": 0, "max": 99, "default": 70}
+        ]
+    },
+    {
+        "name": "Basquete",
+        "icon": "https://cdn-icons-png.flaticon.com/512/2128/2128322.png",
+        "attributeDefs": [
+            {"key": "fin", "label": "Finalização", "min": 0, "max": 99, "default": 75},
+            {"key": "sho", "label": "Arremesso", "min": 0, "max": 99, "default": 70},
+            {"key": "pla", "label": "Organização", "min": 0, "max": 99, "default": 75},
+            {"key": "def", "label": "Defesa", "min": 0, "max": 99, "default": 65},
+            {"key": "reb", "label": "Rebote", "min": 0, "max": 99, "default": 60},
+            {"key": "phy", "label": "Físico", "min": 0, "max": 99, "default": 75}
+        ]
+    },
+    {
+        "name": "Tênis",
+        "icon": "https://cdn-icons-png.flaticon.com/512/5022/5022062.png",
+        "attributeDefs": [
+            {"key": "for", "label": "Forehand", "min": 0, "max": 99, "default": 75},
+            {"key": "bac", "label": "Backhand", "min": 0, "max": 99, "default": 70},
+            {"key": "ser", "label": "Saque", "min": 0, "max": 99, "default": 75},
+            {"key": "vol", "label": "Voleio", "min": 0, "max": 99, "default": 65},
+            {"key": "mov", "label": "Movimentação", "min": 0, "max": 99, "default": 80},
+            {"key": "sta", "label": "Resistência", "min": 0, "max": 99, "default": 75}
+        ]
+    },
+    {
+        "name" : "Beach Tennis",
+        "icon" : "https://www.k2trofeus.com.br/uploads/subcategoria/img_11633_20220621.png",
+        "attributeDefs" : [
+            { "key" : "for", "label" : "Forehand", "min" : 0, "max" : 99, "default" : 75 },
+            { "key" : "bac", "label" : "Backhand", "min" : 0, "max" : 99, "default" : 70 },
+            { "key" : "ser", "label" : "Saque", "min" : 0, "max" : 99, "default" : 75 },
+            { "key" : "vol", "label" : "Voleio", "min" : 0, "max" : 99, "default" : 65 },
+            { "key" : "mov", "label" : "Movimentação", "min" : 0, "max" : 99, "default" : 80 },
+            { "key" : "sta", "label" : "Resistência", "min" : 0, "max" : 99, "default" : 75 }
+        ]
+    }
+]
+
+def create_sports():
+    created_ids = []
+    for sport in SPORTS_DATA:
+        try:
+            response = requests.post(f"{BASE_URL}/sport", json=sport)
+            response.raise_for_status()
+            data = response.json()
+            print(f"Sport created: {data['name']} (ID: {data['_id']})")
+            created_ids.append(data['_id'])
+        except requests.exceptions.RequestException as e:
+            print(f"Error creating sport {sport['name']}: {e}")
+    return created_ids
 
 def create_card(player_id, sport_id):
     # Gera atributos aleatórios
@@ -125,15 +177,18 @@ def main():
         print("No players created. Exiting.")
         return
 
-    # 2. Create Sport
-    sport_id = create_sport()
-    if not sport_id:
-        print("Failed to create sport. Exiting.")
+    # 2. Create Sports
+    sport_ids = create_sports()
+    if not sport_ids:
+        print("Failed to create sports. Exiting.")
         return
 
-    # 3. Create Cards
+    # 3. Create Cards (Only for the first sport - Vôlei)
+    # Assuming Vôlei is the first one in the list
+    volei_id = sport_ids[0]
+    
     for pid in player_ids:
-        create_card(pid, sport_id)
+        create_card(pid, volei_id)
 
     print("Done!")
 
