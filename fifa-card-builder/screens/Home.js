@@ -1,9 +1,30 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
+
+const cardImages = [
+  require('../assets/gold.png'),
+  require('../assets/silver.png'),
+  require('../assets/bronze.png')
+];
 
 export default function Home({ navigation }) {
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentImageIndex((prevIndex) => (prevIndex + 1) % cardImages.length);
+    }, 1500); // Troca a cada 1,5 segundos
+
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <View style={styles.container}>
+      <Image 
+        source={cardImages[currentImageIndex]} 
+        style={styles.logo} 
+        resizeMode="contain"
+      />
       <Text style={styles.title}>FIFA Card Builder</Text>
       
       <View style={styles.buttonContainer}>
@@ -32,6 +53,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     padding: 20,
+  },
+  logo: {
+    width: 150,
+    height: 200,
+    marginBottom: 20,
   },
   title: {
     fontSize: 32,
