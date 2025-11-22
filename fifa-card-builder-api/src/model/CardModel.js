@@ -1,9 +1,9 @@
 const mongoose = require("../config/database");
 
 // Relationship model linking a Player to a Sport with sport-specific data
-const PlayerSportSchema = new mongoose.Schema(
+const CardSchema = new mongoose.Schema(
   {
-    playerSportId: {
+    cardId: {
       type: String,
       unique: true,
       default: () => new mongoose.Types.ObjectId().toString(),
@@ -36,8 +36,8 @@ const PlayerSportSchema = new mongoose.Schema(
 );
 
 // Ensure one Player-Sport pair is unique (a player shouldn't have duplicate entries for the same sport)
-PlayerSportSchema.index({ player: 1, sport: 1 }, { unique: true });
+CardSchema.index({ player: 1, sport: 1 }, { unique: true });
 
-const PlayerSport = mongoose.model("PlayerSport", PlayerSportSchema);
+const Card = mongoose.model("Card", CardSchema);
 
-module.exports = PlayerSport;
+module.exports = Card;
