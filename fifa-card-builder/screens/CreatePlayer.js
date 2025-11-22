@@ -131,12 +131,22 @@ export default function CreatePlayer({ navigation, route }) {
       console.log("Resultado do ImagePicker:", result);
       
       if (!result.canceled) {
+        const asset = result.assets[0];
+
+        // Validação prévia de tamanho (2.5MB) para evitar chamadas desnecessárias à API
+        if (asset.fileSize && asset.fileSize > 2.5 * 1024 * 1024) {
+          Alert.alert(
+            "Aviso", 
+            `Imagem muito grande (${(asset.fileSize / (1024 * 1024)).toFixed(2)}MB). Escolha uma imagem menor que 2.5MB.`
+          );
+          return;
+        }
+
         setProcessingImage(true);
         try {
           // Tenta remover o fundo
           console.log("Tentando remover o fundo...");
           let finalImageBase64;
-          const asset = result.assets[0];
           
           try {
             if (REMOVE_BG_API_KEY === "INSERT_YOUR_API_KEY_HERE") {
