@@ -1,42 +1,27 @@
+import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { createStackNavigator } from '@react-navigation/stack';
+
+// Importe as telas
+import Login from './screens/Login';
+import Register from './screens/Register';
 import Home from './screens/Home';
-import ConsultCards from './screens/ConsultCards';
 import CreateCard from './screens/CreateCard';
+import ConsultCards from './screens/ConsultCards';
 import CreatePlayer from './screens/CreatePlayer';
 
-// Cria a pilha de navegação
-const Stack = createNativeStackNavigator();
+const Stack = createStackNavigator();
 
 export default function App() {
   return (
-    // Container principal que gerencia o estado da navegação
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Home">
-        {/* Tela Inicial (sem cabeçalho padrão) */}
-        <Stack.Screen 
-          name="Home" 
-          component={Home} 
-          options={{ headerShown: false }} 
-        />
-        {/* Tela de Consulta de Cartas */}
-        <Stack.Screen 
-          name="ConsultCards" 
-          component={ConsultCards} 
-          options={{ title: 'Consultar Cartas' }} 
-        />
-        {/* Tela de Criação de Carta */}
-        <Stack.Screen 
-          name="CreateCard" 
-          component={CreateCard} 
-          options={{ title: 'Nova Carta' }} 
-        />
-        {/* Tela de Cadastro de Jogador */}
-        <Stack.Screen 
-          name="CreatePlayer" 
-          component={CreatePlayer} 
-          options={{ title: 'Novo Jogador' }} 
-        />
+      <Stack.Navigator initialRouteName="Login">
+        <Stack.Screen name="Login" component={Login} options={{ headerShown: false }} />
+        <Stack.Screen name="Register" component={Register} options={{ title: 'Criar Conta' }} />
+        <Stack.Screen name="Home" component={Home} options={{ title: 'Menu Principal', headerLeft: null }} />
+        <Stack.Screen name="CreateCard" component={CreateCard} options={{ title: 'Criar Carta' }} />
+        <Stack.Screen name="ConsultCards" component={ConsultCards} options={{ title: 'Minhas Cartas' }} />
+        <Stack.Screen name="CreatePlayer" component={CreatePlayer} options={{ title: 'Criar Jogador' }} />
       </Stack.Navigator>
     </NavigationContainer>
   );

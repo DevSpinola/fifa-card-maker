@@ -4,6 +4,8 @@ import json
 
 BASE_URL = "http://localhost:3000"
 
+TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjEiLCJub21lIjoiQWRtaW4iLCJpYXQiOjE3NjQxMTM2OTcsImV4cCI6MTc2NDIwMDA5N30.QAy05yfCi4ZRrc7dB823b-qADUzKnQngxNhxn797vE4"
+HEADERS = {"Authorization": f"Bearer {TOKEN}"}
 # 1x1 pixel transparent PNG base64 (Use isso se não tiver a foto real)
 PLACEHOLDER_IMAGE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="
 
@@ -46,7 +48,7 @@ def create_player(player_data):
         "photo": player_data["photo"]
     }
     try:
-        response = requests.post(f"{BASE_URL}/player", json=payload)
+        response = requests.post(f"{BASE_URL}/player", json=payload, headers=HEADERS)
         response.raise_for_status()
         data = response.json()
         print(f"Player created: {data['name']} (ID: {data['_id']})")
@@ -121,8 +123,9 @@ SPORTS_DATA = [
 def create_sports():
     created_ids = []
     for sport in SPORTS_DATA:
-        try:
-            response = requests.post(f"{BASE_URL}/sport", json=sport)
+        try:            
+            
+            response = requests.post(f"{BASE_URL}/sport", json=sport, headers=HEADERS)
             response.raise_for_status()
             data = response.json()
             print(f"Sport created: {data['name']} (ID: {data['_id']})")
@@ -156,7 +159,7 @@ def create_card(player_id, sport_id):
     }
 
     try:
-        response = requests.post(f"{BASE_URL}/card", json=payload)
+        response = requests.post(f"{BASE_URL}/card", json=payload, headers=HEADERS)
         response.raise_for_status()
         data = response.json()
         print(f"Card created for player {player_id}: {position} - OVR {overall}")
