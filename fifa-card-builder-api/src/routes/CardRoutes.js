@@ -2,11 +2,15 @@ const express = require('express');
 const router = express.Router();
 const CardController = require('../controller/CardController');
 const CardValidation = require('../middlewares/CardValidation');
+const AuthMiddleware = require('../middlewares/AuthMiddleware'); // Importar
 
-router.post('/', CardValidation, CardController.create);
-router.get('/', CardController.getAll);
-router.get('/:id', CardController.getById);
-router.put('/:id', CardValidation, CardController.update);
-router.delete('/:id', CardController.delete);
+// Adicione AuthMiddleware antes do Controller para proteger a rota
+router.post('/', AuthMiddleware, CardValidation, CardController.create);
+router.put('/:id', AuthMiddleware, CardValidation, CardController.update);
+router.delete('/:id', AuthMiddleware, CardController.delete);
+
+// Se quiser que apenas usuários logados vejam os cards, adicione aqui também:
+router.get('/', AuthMiddleware, CardController.getAll);
+router.get('/:id', AuthMiddleware, CardController.getById);
 
 module.exports = router;

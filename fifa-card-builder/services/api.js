@@ -1,15 +1,22 @@
 import axios from "axios";
-
-// Para Android Emulator use 'http://10.0.2.2:3000'
-// Para iOS Simulator use 'http://localhost:3000'
-// Para dispositivo físico use o IP da sua máquina ex: 'http://192.168.1.5:3000'
+import * as SecureStore from 'expo-secure-store';
 
 const api = axios.create({
-  baseURL: "http://10.0.2.2:3000",
-  timeout: 30000, // 30 segundos para upload de imagens
-  headers: {
-    "Content-Type": "application/json",
-  },
+    // Se estiver no emulador Android, use 10.0.2.2. Se for dispositivo físico, use o IP da sua máquina.
+    baseURL: "http://10.0.2.2:3000", 
+});
+
+// Interceptador para adicionar o Token em todas as requisições
+api.interceptors.request.use(async (config) => {
+    try {
+        const token = await SecureStore.getItemAsync('fifa_jwt_token');
+        if (token) {
+            config.headers.Authorization = `Bearer ${token}`;
+        }
+    } catch (error) {
+        console.error("Erro ao recuperar token", error);
+    }
+    return config;
 });
 
 export default api;

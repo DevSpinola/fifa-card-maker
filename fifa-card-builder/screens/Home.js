@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import { removeToken } from '../services/authService'; // <--- Importação adicionada
 
 // Imagens das cartas para a animação da logo
 const cardImages = [
@@ -20,6 +21,12 @@ export default function Home({ navigation }) {
     return () => clearInterval(interval);
   }, []);
 
+  // <--- Função de Logout adicionada
+  const handleLogout = async () => {
+    await removeToken();
+    navigation.replace('Login');
+  };
+
   return (
     <View style={styles.container}>
       {/* Exibe a imagem atual do carrossel */}
@@ -39,12 +46,28 @@ export default function Home({ navigation }) {
           <Text style={styles.buttonText}>Consultar Cartas</Text>
         </TouchableOpacity>
 
-        {/* Botão para navegar para a tela de criação */}
+        {/* Botão para navegar para a tela de criação de Carta */}
         <TouchableOpacity 
           style={styles.button} 
           onPress={() => navigation.navigate('CreateCard')}
         >
           <Text style={styles.buttonText}>Criar Nova Carta</Text>
+        </TouchableOpacity>
+
+        {/* <--- Botão Novo: Criar Jogador (Mantendo o estilo original) */}
+        <TouchableOpacity 
+          style={styles.button} 
+          onPress={() => navigation.navigate('CreatePlayer')}
+        >
+          <Text style={styles.buttonText}>Criar Jogador</Text>
+        </TouchableOpacity>
+
+        {/* <--- Botão Novo: Sair (Mantendo o estilo, com cor de alerta) */}
+        <TouchableOpacity 
+          style={[styles.button, { backgroundColor: '#d9534f', marginTop: 10 }]} 
+          onPress={handleLogout}
+        >
+          <Text style={styles.buttonText}>Sair</Text>
         </TouchableOpacity>
       </View>
     </View>
